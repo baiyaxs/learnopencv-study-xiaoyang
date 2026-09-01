@@ -2,7 +2,7 @@
 
 以 Automatic Document Scanner 为主线，在 7 天内学习传统数字图像处理，并实现一个可演示的手机文档扫描器。
 
-当前状态：**Day 1 / 7 已完成**。目前仓库包含基础实验，还不是完整扫描器。
+当前状态：**Day 2 / 7 已完成**。目前仓库包含基础实验，还不是完整扫描器。
 
 ## 最终目标
 
@@ -22,8 +22,8 @@
 | 天数 | 主题 | 状态 |
 |---|---|---|
 | Day 1 | 图像矩阵、BGR/RGB、灰度化、HSV、ROI、缩放、坐标映射、直方图 | 已完成 |
-| Day 2 | 噪声、均值/高斯/中值滤波、形态学操作、阈值分割 | 待开始 |
-| Day 3 | Canny 边缘、轮廓检测、面积与四边形筛选 | 未开始 |
+| Day 2 | 噪声、均值/高斯/中值滤波、形态学操作、固定阈值与 Otsu | 已完成 |
+| Day 3 | 自适应阈值、Canny 边缘、轮廓检测、面积与四边形筛选 | 未开始 |
 | Day 4 | 角点排序、Homography、透视变换 | 未开始 |
 | Day 5 | 完整传统视觉流水线、扫描结果增强、失败检测 | 未开始 |
 | Day 6 | Streamlit 界面、过程展示和文件下载 | 未开始 |
@@ -47,6 +47,22 @@
 
 ![灰度直方图](outputs/day01_histogram.png)
 
+## Day 2 实验
+
+| 文件 | 内容 |
+|---|---|
+| [`work/day02_noise.py`](work/day02_noise.py) | 可控高斯/椒盐噪声、三种滤波器及核大小对比 |
+| [`work/day02_morphology.py`](work/day02_morphology.py) | 腐蚀、膨胀、开闭运算及结构元素尺度实验 |
+| [`work/day02_threshold.py`](work/day02_threshold.py) | 固定阈值与 Otsu 全局阈值对比 |
+
+部分实验结果：
+
+![噪声与滤波对比](outputs/day02_noise_filters.png)
+
+![真实图像闭运算](outputs/day02_document_closing.png)
+
+![全局阈值对比](outputs/day02_threshold.png)
+
 ## 当前技术结论
 
 - OpenCV 彩色图像使用 `(H, W, 3)` 的 BGR 数组，灰度图通常使用 `(H, W)` 的单通道数组。
@@ -56,6 +72,9 @@
 - 检测阶段可缩小图片以减少计算量，再将角点按实际宽高比例映射回原图。
 - 灰度权重会改变纸张与背景的亮度梯度，因此原图存在颜色差异不代表灰度后一定具有清晰边界。
 - 全局直方图只统计亮度数量，不保留像素位置；比较具体物体时需要使用 ROI 或掩膜。
+- 高斯、均值和中值滤波各有适用条件；最低全局 MSE 不一定对应最清楚的文字或边界。
+- 结构元素过大或迭代过多会改写真实几何结构，产生块状区域和假轮廓。
+- 当前图片上，Otsu 自动得到 `T=108`，与固定 `T=100` 接近；若只提取纸袋整体，`T=150` 更清楚，但内部细节损失更多。
 
 ## 项目结构
 
@@ -91,6 +110,9 @@ python work/day01_grayscale.py
 python work/day01_roi.py
 python work/day01_resize.py
 python work/day01_histogram.py
+python work/day02_noise.py
+python work/day02_morphology.py
+python work/day02_threshold.py
 ```
 
 生成结果保存在 `outputs/`。当前脚本使用固定输出文件名，切换测试图片时会覆盖上一次结果。
