@@ -125,8 +125,8 @@ plt.close(fig)
 fig, axes = plt.subplots(2, 5, figsize=(16,7))
 
 rows = [
-    ("Gaussian Noise", gaussian_noisy, gaussian_test),
-    ("Salt & pepper", salt_pepper_noisy, salt_pepper_test),
+    ("Gaussian Noise", gaussian_noisy, gaussian_results),
+    ("Salt & pepper", salt_pepper_noisy, salt_pepper_results),
 ]
 
 for row_index, (noise_name, noisy, results) in enumerate(rows):

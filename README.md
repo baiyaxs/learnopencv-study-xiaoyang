@@ -2,7 +2,7 @@
 
 以 Automatic Document Scanner 为主线，在 7 天内学习传统数字图像处理，并实现一个可演示的手机文档扫描器。
 
-当前状态：**Day 2 / 7 已完成**。目前仓库包含基础实验，还不是完整扫描器。
+当前状态：**Day 3 / 7 已完成**。目前仓库包含基础实验，还不是完整扫描器。
 
 ## 最终目标
 
@@ -23,7 +23,7 @@
 |---|---|---|
 | Day 1 | 图像矩阵、BGR/RGB、灰度化、HSV、ROI、缩放、坐标映射、直方图 | 已完成 |
 | Day 2 | 噪声、均值/高斯/中值滤波、形态学操作、固定阈值与 Otsu | 已完成 |
-| Day 3 | 自适应阈值、Canny 边缘、轮廓检测、面积与四边形筛选 | 未开始 |
+| Day 3 | 自适应阈值、Canny 边缘、轮廓检测、面积与四边形筛选 | 已完成 |
 | Day 4 | 角点排序、Homography、透视变换 | 未开始 |
 | Day 5 | 完整传统视觉流水线、扫描结果增强、失败检测 | 未开始 |
 | Day 6 | Streamlit 界面、过程展示和文件下载 | 未开始 |
@@ -63,6 +63,23 @@
 
 ![全局阈值对比](outputs/day02_threshold.png)
 
+## Day 3 实验
+
+| 文件 | 内容 |
+|---|---|
+| [`work/day03_adaptive_threshold.py`](work/day03_adaptive_threshold.py) | Otsu 与均值/高斯自适应阈值对比 |
+| [`work/day03_adaptive_parameters.py`](work/day03_adaptive_parameters.py) | `blockSize` 与 `C` 的控制变量实验 |
+| [`work/day03_canny.py`](work/day03_canny.py) | Canny 双阈值与边缘数量、连续性对比 |
+| [`work/day03_contours.py`](work/day03_contours.py) | 闭运算、轮廓面积排序、多边形近似与文档候选筛选 |
+
+部分实验结果：
+
+![自适应阈值参数对比](outputs/day03_adaptive_parameters.png)
+
+![Canny 双阈值对比](outputs/day03_canny.png)
+
+![文档四边形候选](outputs/day03_document_candidate.png)
+
 ## 当前技术结论
 
 - OpenCV 彩色图像使用 `(H, W, 3)` 的 BGR 数组，灰度图通常使用 `(H, W)` 的单通道数组。
@@ -74,7 +91,10 @@
 - 全局直方图只统计亮度数量，不保留像素位置；比较具体物体时需要使用 ROI 或掩膜。
 - 高斯、均值和中值滤波各有适用条件；最低全局 MSE 不一定对应最清楚的文字或边界。
 - 结构元素过大或迭代过多会改写真实几何结构，产生块状区域和假轮廓。
-- 当前图片上，Otsu 自动得到 `T=108`，与固定 `T=100` 接近；若只提取纸袋整体，`T=150` 更清楚，但内部细节损失更多。
+- 早期实拍样例上，Otsu 自动得到 `T=108`，与固定 `T=100` 接近；若只提取纸袋整体，`T=150` 更清楚，但内部细节损失更多。
+- Canny 阈值控制梯度边缘的接受标准；降低阈值会增加弱边缘和噪声，提高阈值则可能令目标边界断裂。
+- `findContours()` 不会主动跨越断点；闭运算只能连接有限尺度的缺口，无法恢复被遮挡而不存在的边缘。
+- 当前清晰训练图通过相对面积、四顶点和凸性筛选得到文档候选，轮廓面积约占全图 `34.2%`，并稳定近似出四个角点。
 
 ## 项目结构
 
@@ -134,3 +154,5 @@ python work/day02_threshold.py
 - [LearnOpenCV GitHub repository](https://github.com/spmallick/learnopencv)
 
 本项目以教程的处理思路作为学习参考，代码按每日实验逐步独立实现，不直接复制完整成品。若后续需要引入外部代码、图片或其他资源，应先检查对应文件或目录的许可证，并在此处保留作者、来源和修改说明。
+
+`inputs/document.jpg` 是 2026-09-02 使用 OpenAI 内置图像生成工具制作的合成训练图片，用于提供四角完整可见、无物体遮挡且带透视的基础文档检测场景。
