@@ -3,7 +3,6 @@ from pathlib import Path
 import cv2
 import matplotlib.pyplot as plt
 
-
 root = Path(__file__).resolve().parents[1]
 image = cv2.imread(str(root / "inputs" / "document.jpg"))
 
