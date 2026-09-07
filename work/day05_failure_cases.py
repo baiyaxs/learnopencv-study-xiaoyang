@@ -7,6 +7,7 @@ from day05_robust_scanner import (
     analyze_scan_quality,
     scan_document,
 )
+from pathlib import Path
 
 blank_image = np.full(
     (600, 800, 3),
@@ -39,6 +40,28 @@ test_images = {
     "small_rectangle": small_rectangle_image,
     "circle": circle_image,
 }
+
+root = Path(__file__).resolve().parents[1]
+
+failure_input_directory = (
+    root / "inputs" / "failure_cases"
+)
+
+failure_input_directory.mkdir(
+    parents=True,
+    exist_ok=True,
+)
+
+for test_name, test_image in test_images.items():
+    output_path = (
+        failure_input_directory
+        / f"{test_name}.png"
+    )
+
+    cv2.imwrite(
+        str(output_path),
+        test_image,
+    )
 
 quality_test_images = {
     "all_white": np.full(

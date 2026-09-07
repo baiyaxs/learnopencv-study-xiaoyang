@@ -273,9 +273,17 @@ def analyze_scan_quality(binary_image):
         "warnings": warnings,
     }
 
-def scan_document(input_image):
+def scan_document(
+        input_image,
+        canny_low=30,
+        canny_high=90,
+):
     document_points, debug_images, diagnostics = (
-        find_document_corners(input_image)
+        find_document_corners(
+            input_image,
+            canny_low=canny_low,
+            canny_high=canny_high,
+        )
     )
 
     result = {
