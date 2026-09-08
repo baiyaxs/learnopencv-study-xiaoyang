@@ -58,8 +58,6 @@ def find_document_corners(
         reverse=True,
     )
 
-    print("轮廓数量:", len(sorted_contours))
-
     image_height, image_width = input_image.shape[:2]
     image_area = image_height * image_width
     minimum_area = image_area * minimum_area_ratio
@@ -81,11 +79,6 @@ def find_document_corners(
         "minimum_area_ratio": minimum_area / image_area,
         "checked_candidate_count": 0,
     }
-
-    print(
-        f"最大轮廓占比: {largest_contour_ratio:.1%}, "
-        f"最低要求: {minimum_area / image_area:.1%}"
-    )
 
     for contour in sorted_contours:
         area = cv2.contourArea(contour)
@@ -173,17 +166,36 @@ def validate_document_points(input_points, image_shape):
     return area_ratio
 
 def order_points(input_points):
-    ordered = np.zeros(
-        (4, 2),
-        dtype = np.float32,
+    center = input_points.mean(
+        axis=0
     )
-    sums = input_points.sum(axis=1)
-    differences = input_points[:, 1] - input_points[:, 0]
-    ordered[0] = input_points[np.argmin(sums)]
-    ordered[1] = input_points[np.argmin(differences)]
-    ordered[2] = input_points[np.argmax(sums)]
-    ordered[3] = input_points[np.argmax(differences)]
-    return ordered
+
+    offsets = (
+        input_points - center
+    )
+
+    angles = np.arctan2(
+        offsets[:, 1],
+        offsets[:, 0],
+    )
+
+    ordered = input_points[
+        np.argsort(angles)
+    ]
+
+    top_left_index = np.argmin(
+        ordered.sum(axis=1)
+    )
+
+    ordered = np.roll(
+        ordered,
+        -top_left_index,
+        axis=0,
+    )
+
+    return ordered.astype(
+        np.float32
+    )
 
 def warp_document(input_image, input_points):
     ordered_points = order_points(input_points)
@@ -195,8 +207,6 @@ def warp_document(input_image, input_points):
 
     target_width = int(round(max(width_top, width_bottom)))
     target_height = int(round(target_width * 297 / 210))
-
-    print("自动计算的目标尺寸:", target_width, target_height)
 
     destination_points = np.array(
         [
@@ -426,6 +436,11 @@ def main():
         str(binary_output_path),
         scanned_binary,
     )
+
+    if not saved:
+        raise OSError(
+            f"无法保存扫描结果: {output_path}"
+        )
 
     #质量报告打印
     print(

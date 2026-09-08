@@ -30,7 +30,7 @@ small_rectangle_image = blank_image.copy()
 cv2.rectangle(
     small_rectangle_image,
     (300, 250),
-    (500, 250),
+    (500, 350),
     (0, 0, 0),
     12,
 )
